@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
+**/.coverage
+**/htmlcov/
+
+# Virtual environments
+**/.venv/
+**/venv/
+**/env/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+
+# Logs
+**/*.log
+backend/logs/
+
+# Media & static (if generated locally)
+backend/media/
+backend/static/
+
+# Node
+frontend/node_modules/
+
+# Build artifacts
+frontend/dist/
+frontend/build/
+
+# Docker
+docker-compose.override.yml
+
+# Documentation
+README.md

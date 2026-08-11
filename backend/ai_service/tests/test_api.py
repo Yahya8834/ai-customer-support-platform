@@ -1,0 +1,67 @@
+from fastapi.testclient import TestClient
+from app.main import app
+from unittest.mock import patch
+
+
+
+client = TestClient(app)
+
+
+def test_create_embedding():
+    response = client.post(
+        "/v1/embeddings",
+        json={"text": "hello world"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert "embedding" in data
+    assert isinstance(data["embedding"], list)
+    assert len(data["embedding"]) == 1024
+
+
+
+def test_create_embedding_requires_text():
+    response = client.post(
+        "/v1/embeddings",
+        json={},
+    )
+
+    assert response.status_code == 422
+
+
+
+def test_create_embedding_rejects_empty_text():
+    response = client.post(
+        "/v1/embeddings",
+        json={"text": ""},
+    )
+
+    assert response.status_code == 422
+
+
+def test_create_embedding_rejects_whitespace_only_text():
+    response = client.post(
+        "/v1/embeddings",
+        json={"text": "   "},
+    )
+
+    assert response.status_code == 422
+
+
+
+@patch(
+    "app.main.embedding_provider.generate",
+    side_effect=Exception("model unavailable"),
+)
+def test_create_embedding_handles_provider_failure(
+    mock_generate,
+):
+    response = client.post(
+        "/v1/embeddings",
+        json={"text": "hello world"},
+    )
+
+    assert response.status_code == 500
