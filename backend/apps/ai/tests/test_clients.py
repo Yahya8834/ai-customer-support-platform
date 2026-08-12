@@ -50,3 +50,14 @@ class OllamaDeepSeekClientTest(SimpleTestCase):
             result,
             ["The ", "return ", "policy ", "is 30 days."],
         )
+
+
+    
+    def test_client_can_be_created_from_configuration(self):
+        client = OllamaDeepSeekClient.from_config(
+            base_url="http://ollama:11434",
+            model="deepseek-r1",
+        )
+
+        self.assertEqual(client.base_url, "http://ollama:11434")
+        self.assertEqual(client.model, "deepseek-r1")
