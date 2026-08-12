@@ -1,6 +1,7 @@
-from django.test import SimpleTestCase
-from apps.ai.providers.base import LLMProvider
 from unittest.mock import Mock
+from django.test import SimpleTestCase
+from apps.ai.providers.llm.base import LLMProvider
+from apps.ai.providers.llm.deepseek import DeepSeekProvider
 
 
 
