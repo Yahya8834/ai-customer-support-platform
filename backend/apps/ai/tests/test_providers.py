@@ -25,3 +25,22 @@ class DeepSeekProviderTest(SimpleTestCase):
         client.generate.assert_called_once_with(
             "What is your return policy?"
         )
+
+    
+    def test_deepseek_provider_requires_a_client(self):
+        with self.assertRaises(TypeError):
+            DeepSeekProvider()
+
+
+    def test_generate_uses_client_chat_method(self):
+        client = Mock()
+        client.chat.return_value = "The return policy is 30 days."
+
+        provider = DeepSeekProvider(client=client)
+
+        result = provider.generate("What is your return policy?")
+
+        self.assertEqual(result, "The return policy is 30 days.")
+        client.chat.assert_called_once_with(
+            "What is your return policy?"
+        )
