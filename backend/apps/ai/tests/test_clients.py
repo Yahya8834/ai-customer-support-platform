@@ -31,25 +31,6 @@ class OllamaDeepSeekClientTest(SimpleTestCase):
 
 
 
-    def test_stream_returns_ollama_stream(self):
-        ollama = Mock()
-        ollama.stream.return_value = iter(
-            ["The ", "return ", "policy ", "is 30 days."]
-        )
-
-        client = OllamaDeepSeekClient(ollama=ollama)
-
-        result = list(client.stream("What is your return policy?"))
-
-        self.assertEqual(
-            result,
-            ["The ", "return ", "policy ", "is 30 days."],
-        )
-        ollama.stream.assert_called_once_with(
-            "What is your return policy?"
-        )
-
-
     def test_stream_yields_message_content(self):
         ollama = Mock()
         ollama.stream.return_value = iter(

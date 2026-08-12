@@ -11,4 +11,5 @@ class OllamaDeepSeekClient(DeepSeekClient):
         return response["message"]["content"]
 
     def stream(self, prompt: str):
-        return self.ollama.stream(prompt)
+        for chunk in self.ollama.stream(prompt):
+            yield chunk["message"]["content"]
