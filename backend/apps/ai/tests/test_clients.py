@@ -14,48 +14,65 @@ class DeepSeekClientTest(SimpleTestCase):
 class OllamaDeepSeekClientTest(SimpleTestCase):
     def test_chat_returns_response_from_ollama(self):
         ollama = Mock()
-        ollama.chat.return_value = {
+
+        response = Mock()
+        response.json.return_value = {
             "message": {
-                "content": "The return policy is 30 days."
+                "content": "The return policy is 30 days.",
             }
         }
+
+        ollama.post.return_value = response
 
         client = OllamaDeepSeekClient(ollama=ollama)
 
         result = client.chat("What is your return policy?")
 
-        self.assertEqual(result, "The return policy is 30 days.")
-        ollama.chat.assert_called_once_with(
-            model=None,
-            messages=[
-                {
-                    "role": "user",
-                    "content": "What is your return policy?",
-                },
-            ],
+        self.assertEqual(
+            result,
+            "The return policy is 30 days.",
+        )
+
+        ollama.post.assert_called_once_with(
+            "/api/chat",
+            json={
+                "model": None,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "What is your return policy?",
+                    },
+                ],
+                "stream": False,
+            },
         )
 
 
 
     def test_stream_yields_message_content(self):
         ollama = Mock()
-        ollama.chat.return_value = iter(
+
+        ollama.post.return_value.iter_lines.return_value = iter(
             [
-                {"message": {"content": "The "}},
-                {"message": {"content": "return "}},
-                {"message": {"content": "policy "}},
-                {"message": {"content": "is 30 days."}},
+                '{"message":{"content":"The "}}',
+                '{"message":{"content":"return "}}',
+                '{"message":{"content":"policy "}}',
+                '{"message":{"content":"is 30 days."}}',
             ]
         )
 
-        client = OllamaDeepSeekClient(ollama=ollama)
+        client = OllamaDeepSeekClient(
+            ollama=ollama,
+            base_url="http://mac-host:11434",
+            model="deepseek-r1",
+        )
 
         result = list(client.stream("What is your return policy?"))
 
         self.assertEqual(
             result,
             ["The ", "return ", "policy ", "is 30 days."],
-        )
+    )
 
 
     
