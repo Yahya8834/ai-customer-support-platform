@@ -1,6 +1,6 @@
 from collections.abc import Iterator
-
 from .base import LLMProvider
+
 
 
 class DeepSeekProvider(LLMProvider):
@@ -8,7 +8,7 @@ class DeepSeekProvider(LLMProvider):
         self.client = client
 
     def generate(self, prompt: str) -> str:
-        return self.client.generate(prompt)
+        return self.client.chat(prompt)
 
     def stream(self, prompt: str) -> Iterator[str]:
         return self.client.stream(prompt)
