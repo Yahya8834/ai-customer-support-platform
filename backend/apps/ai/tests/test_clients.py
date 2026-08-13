@@ -86,3 +86,44 @@ class OllamaDeepSeekClientTest(SimpleTestCase):
 
         self.assertIs(result.ollama, client)
         self.assertEqual(result.model, "deepseek-r1")
+
+
+
+    def test_chat_sends_request_to_ollama(self):
+        ollama = Mock()
+
+        response = Mock()
+        response.json.return_value = {
+            "message": {
+                "content": "The return policy is 30 days.",
+            },
+        }
+
+        ollama.post.return_value = response
+
+        client = OllamaDeepSeekClient(
+            ollama=ollama,
+            base_url="http://mac-host:11434",
+            model="deepseek-r1",
+        )
+
+        result = client.chat("What is your return policy?")
+
+        ollama.post.assert_called_once_with(
+            "/api/chat",
+            json={
+                "model": "deepseek-r1",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "What is your return policy?",
+                    },
+                ],
+                "stream": False,
+            },
+        )
+
+        self.assertEqual(
+            result,
+            "The return policy is 30 days.",
+        )
