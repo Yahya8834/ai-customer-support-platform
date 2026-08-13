@@ -15,7 +15,17 @@ class DeepSeekProvider(LLMProvider):
         return self.client.stream(prompt)
     
     @classmethod
-    def from_config(cls, base_url: str, model: str):
+    def from_config(
+        cls,
+        base_url: str,
+        model: str,
+        client_type: str = "ollama",
+    ):
+        if client_type != "ollama":
+            raise ValueError(
+                f"Unsupported DeepSeek client type: {client_type}"
+            )
+
         client = OllamaDeepSeekClient.from_config(
             base_url=base_url,
             model=model,
