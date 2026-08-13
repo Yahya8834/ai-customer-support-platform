@@ -90,7 +90,7 @@ class DeepSeekProviderTest(SimpleTestCase):
 
 
 
-    @patch("apps.ai.providers.llm.clients.ollama.OllamaDeepSeekClient")
+    @patch("apps.ai.providers.llm.deepseek.OllamaDeepSeekClient")
     def test_from_config_creates_provider(self, client_class):
         client = Mock()
         client_class.from_config.return_value = client
@@ -106,3 +106,13 @@ class DeepSeekProviderTest(SimpleTestCase):
         )
 
         self.assertIs(provider.client, client)
+
+
+
+    def test_from_config_requires_client_type(self):
+        with self.assertRaises(ValueError):
+            DeepSeekProvider.from_config(
+                base_url="http://mac-host:11434",
+                model="deepseek-r1",
+                client_type="unsupported",
+            )
