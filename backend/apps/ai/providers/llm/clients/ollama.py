@@ -1,4 +1,5 @@
 import httpx
+import json
 from .deepseek import DeepSeekClient
 
 
@@ -26,21 +27,44 @@ class OllamaDeepSeekClient(DeepSeekClient):
         )
 
     def chat(self, prompt: str) -> str:
-        response = self.ollama.chat(
-            model=self.model,
-            messages=[
-                {"role": "user", "content": prompt},
-            ],
+        response = self.ollama.post(
+            "/api/chat",
+            json={
+                "model": self.model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    },
+                ],
+                "stream": False,
+            },
         )
 
-        return response["message"]["content"]
+        return response.json()["message"]["content"]
+
 
     def stream(self, prompt: str):
-        for chunk in self.ollama.chat(
-            model=self.model,
-            messages=[
-                {"role": "user", "content": prompt},
-            ],
-            stream=True,
-        ):
-            yield chunk["message"]["content"]
+        response = self.ollama.post(
+            "/api/chat",
+            json={
+                "model": self.model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    },
+                ],
+                "stream": True,
+            },
+        )
+
+        for line in response.iter_lines():
+            if not line:
+                continue
+
+            chunk = json.loads(line)
+            content = chunk.get("message", {}).get("content")
+
+            if content:
+                yield content
