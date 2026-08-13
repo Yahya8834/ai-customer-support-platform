@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 from apps.ai.providers.llm.clients.deepseek import DeepSeekClient
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from apps.ai.providers.llm.clients.ollama import OllamaDeepSeekClient
 
 
@@ -61,3 +61,21 @@ class OllamaDeepSeekClientTest(SimpleTestCase):
 
         self.assertEqual(client.base_url, "http://ollama:11434")
         self.assertEqual(client.model, "deepseek-r1")
+
+
+    @patch("apps.ai.providers.llm.clients.ollama.Client")
+    def test_from_config_creates_ollama_client(self, client_class):
+        client = Mock()
+        client_class.return_value = client
+
+        result = OllamaDeepSeekClient.from_config(
+            base_url="http://mac-host:11434",
+            model="deepseek-r1",
+        )
+
+        client_class.assert_called_once_with(
+            host="http://mac-host:11434",
+        )
+
+        self.assertIs(result.ollama, client)
+        self.assertEqual(result.model, "deepseek-r1")
