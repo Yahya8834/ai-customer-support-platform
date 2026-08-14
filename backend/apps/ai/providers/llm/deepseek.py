@@ -1,7 +1,6 @@
 from collections.abc import Iterator
 from .base import LLMProvider
-from apps.ai.providers.llm.clients.ollama import OllamaDeepSeekClient
-
+from apps.ai.providers.llm.clients.factory import LLMClientFactory
 
 
 class DeepSeekProvider(LLMProvider):
@@ -14,6 +13,7 @@ class DeepSeekProvider(LLMProvider):
     def stream(self, prompt: str) -> Iterator[str]:
         return self.client.stream(prompt)
     
+    
     @classmethod
     def from_config(
         cls,
@@ -21,12 +21,9 @@ class DeepSeekProvider(LLMProvider):
         model: str,
         client_type: str = "ollama",
     ):
-        if client_type != "ollama":
-            raise ValueError(
-                f"Unsupported DeepSeek client type: {client_type}"
-            )
-
-        client = OllamaDeepSeekClient.from_config(
+        client = LLMClientFactory.create(
+            provider="deepseek",
+            client_type=client_type,
             base_url=base_url,
             model=model,
         )
