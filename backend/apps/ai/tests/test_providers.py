@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 from django.test import SimpleTestCase
 from apps.ai.providers.llm.base import LLMProvider
 from apps.ai.providers.llm.deepseek import DeepSeekProvider
+from apps.ai.providers.llm.clients.factory import LLMClientFactory
 
 
 
@@ -116,3 +117,26 @@ class DeepSeekProviderTest(SimpleTestCase):
                 model="deepseek-r1",
                 client_type="unsupported",
             )
+
+
+
+    
+    @patch("apps.ai.providers.llm.deepseek.LLMClientFactory")
+    def test_from_config_uses_client_factory(self, factory):
+        client = Mock()
+        factory.create.return_value = client
+
+        provider = DeepSeekProvider.from_config(
+            base_url="http://mac-host:11434",
+            model="deepseek-r1",
+            client_type="ollama",
+        )
+
+        factory.create.assert_called_once_with(
+            provider="deepseek",
+            client_type="ollama",
+            base_url="http://mac-host:11434",
+            model="deepseek-r1",
+        )
+
+        self.assertIs(provider.client, client)
