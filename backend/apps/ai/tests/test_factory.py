@@ -3,7 +3,6 @@ from django.test import SimpleTestCase
 from apps.ai.providers.llm.clients.factory import LLMClientFactory
 
 
-
 class LLMClientFactoryTest(SimpleTestCase):
     @patch(
         "apps.ai.providers.llm.clients.factory.OllamaDeepSeekClient"
@@ -25,3 +24,35 @@ class LLMClientFactoryTest(SimpleTestCase):
         )
 
         self.assertIs(result, client)
+
+
+
+    def test_rejects_unsupported_client(self):
+        with self.assertRaises(ValueError):
+            LLMClientFactory.create(
+                provider="deepseek",
+                client_type="unsupported",
+                base_url="http://mac-host:11434",
+                model="deepseek-r1",
+            )
+
+    
+
+    def test_rejects_unsupported_provider(self):
+        with self.assertRaises(ValueError):
+            LLMClientFactory.create(
+                provider="unsupported",
+                client_type="ollama",
+                base_url="http://mac-host:11434",
+                model="deepseek-r1",
+            )
+
+    
+
+    def test_requires_client_type(self):
+        with self.assertRaises(TypeError):
+            LLMClientFactory.create(
+                provider="deepseek",
+                base_url="http://mac-host:11434",
+                model="deepseek-r1",
+            )

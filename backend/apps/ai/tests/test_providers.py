@@ -91,23 +91,24 @@ class DeepSeekProviderTest(SimpleTestCase):
 
 
 
-    @patch("apps.ai.providers.llm.deepseek.OllamaDeepSeekClient")
-    def test_from_config_creates_provider(self, client_class):
+    @patch("apps.ai.providers.llm.deepseek.LLMClientFactory")
+    def test_from_config_creates_provider(self, factory):
         client = Mock()
-        client_class.from_config.return_value = client
+        factory.create.return_value = client
 
         provider = DeepSeekProvider.from_config(
             base_url="http://mac-host:11434",
             model="deepseek-r1",
         )
 
-        client_class.from_config.assert_called_once_with(
+        factory.create.assert_called_once_with(
+            provider="deepseek",
+            client_type="ollama",
             base_url="http://mac-host:11434",
             model="deepseek-r1",
         )
 
         self.assertIs(provider.client, client)
-
 
 
     def test_from_config_requires_client_type(self):
@@ -140,3 +141,9 @@ class DeepSeekProviderTest(SimpleTestCase):
         )
 
         self.assertIs(provider.client, client)
+
+
+
+    def test_provider_requires_generate_and_stream(self):
+        with self.assertRaises(TypeError):
+            LLMProvider()

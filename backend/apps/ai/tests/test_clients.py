@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 from apps.ai.providers.llm.clients.ollama import OllamaDeepSeekClient
 
 
+
 class DeepSeekClientTest(SimpleTestCase):
     def test_client_requires_chat_and_stream(self):
         with self.assertRaises(TypeError):
@@ -144,3 +145,8 @@ class OllamaDeepSeekClientTest(SimpleTestCase):
             result,
             "The return policy is 30 days.",
         )
+        
+
+
+    
+    

@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "apps.workspaces.apps.WorkspacesConfig",
     "apps.documents.apps.DocumentsConfig",
     "apps.documents_processing.apps.DocumentsProcessingConfig",
+    "apps.ai.apps.AiConfig"
 ]
 
 MIDDLEWARE = [
