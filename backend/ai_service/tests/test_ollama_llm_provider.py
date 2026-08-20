@@ -62,3 +62,28 @@ def test_ollama_llm_provider_raises_for_failed_response(monkeypatch):
 
     with pytest.raises(httpx.HTTPStatusError):
         provider.generate("hello")
+
+
+
+def test_ollama_llm_provider_requires_message_content(monkeypatch):
+    def mock_post(*args, **kwargs):
+        return httpx.Response(
+            200,
+            json={
+                "message": {},
+            },
+            request=httpx.Request(
+                "POST",
+                "http://testserver/api/chat",
+            ),
+        )
+
+    monkeypatch.setattr(httpx, "post", mock_post)
+
+    provider = OllamaLLMProvider(
+        base_url="http://testserver",
+        model="deepseek-r1",
+    )
+
+    with pytest.raises(KeyError):
+        provider.generate("hello")
