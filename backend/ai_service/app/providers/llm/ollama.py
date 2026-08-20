@@ -23,7 +23,7 @@ class OllamaLLMProvider(LLMProvider):
                 ],
                 "stream": False,
             },
-            timeout=60.0,
+            timeout=120.0,
         )
 
         response.raise_for_status()
