@@ -71,3 +71,18 @@ def test_create_embedding_handles_provider_failure(
     assert response.status_code == 500
 
 
+
+@patch(
+    "app.api.chat.llm_provider.generate",
+    return_value="Hello from DeepSeek",
+)
+def test_generate_chat(mock_generate):
+    response = client.post(
+        "/v1/chat",
+        json={"prompt": "hello"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "response": "Hello from DeepSeek",
+    }
