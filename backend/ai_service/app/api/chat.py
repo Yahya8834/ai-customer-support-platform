@@ -2,15 +2,18 @@ from fastapi import APIRouter
 from pydantic import BaseModel, field_validator
 from app.config import settings
 from app.providers.llm.ollama import OllamaLLMProvider
+from app.services.chat import ChatService
 
 
 
 router = APIRouter()
 
 llm_provider = OllamaLLMProvider(
-    base_url=settings.bge_api_url,
+    base_url=settings.llm_api_url,
     model=settings.llm_model,
 )
+
+chat_service = ChatService(llm_provider)
 
 
 class ChatRequest(BaseModel):
@@ -27,6 +30,6 @@ class ChatRequest(BaseModel):
 
 @router.post("/v1/chat")
 def generate_chat(request: ChatRequest):
-    response = llm_provider.generate(request.prompt)
+    response = chat_service.generate(request.prompt)
 
     return {"response": response}

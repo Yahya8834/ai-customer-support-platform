@@ -86,3 +86,21 @@ def test_generate_chat(mock_generate):
     assert response.json() == {
         "response": "Hello from DeepSeek",
     }
+
+
+
+@patch(
+    "app.api.chat.chat_service.generate",
+    return_value="Hello from service",
+)
+def test_generate_chat_uses_chat_service(mock_generate):
+    response = client.post(
+        "/v1/chat",
+        json={"prompt": "hello"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "response": "Hello from service",
+    }
+    mock_generate.assert_called_once_with("hello")
