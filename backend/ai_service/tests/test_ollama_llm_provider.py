@@ -98,3 +98,47 @@ def test_ollama_llm_provider_rejects_empty_prompt():
 
     with pytest.raises(ValueError, match="prompt cannot be empty"):
         provider.generate("   ")
+
+
+
+def test_ollama_llm_provider_sends_model_and_prompt(monkeypatch):
+    captured = {}
+
+    def mock_post(*args, **kwargs):
+        captured["url"] = args[0]
+        captured["json"] = kwargs["json"]
+
+        return httpx.Response(
+            200,
+            json={
+                "message": {
+                    "content": "response",
+                }
+            },
+            request=httpx.Request(
+                "POST",
+                "http://testserver/api/chat",
+            ),
+        )
+
+    monkeypatch.setattr(httpx, "post", mock_post)
+
+    provider = OllamaLLMProvider(
+        base_url="http://testserver",
+        model="deepseek-r1",
+    )
+
+    result = provider.generate("hello")
+
+    assert result == "response"
+    assert captured["url"] == "http://testserver/api/chat"
+    assert captured["json"] == {
+        "model": "deepseek-r1",
+        "messages": [
+            {
+                "role": "user",
+                "content": "hello",
+            },
+        ],
+        "stream": False,
+    }
