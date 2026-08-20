@@ -8,6 +8,9 @@ class OllamaLLMProvider(LLMProvider):
         self.model = model
 
     def generate(self, prompt: str) -> str:
+        if not prompt.strip():
+            raise ValueError("prompt cannot be empty")
+
         response = httpx.post(
             f"{self.base_url}/api/chat",
             json={

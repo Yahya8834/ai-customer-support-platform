@@ -87,3 +87,14 @@ def test_ollama_llm_provider_requires_message_content(monkeypatch):
 
     with pytest.raises(KeyError):
         provider.generate("hello")
+
+
+
+def test_ollama_llm_provider_rejects_empty_prompt():
+    provider = OllamaLLMProvider(
+        base_url="http://testserver",
+        model="deepseek-r1",
+    )
+
+    with pytest.raises(ValueError, match="prompt cannot be empty"):
+        provider.generate("   ")
