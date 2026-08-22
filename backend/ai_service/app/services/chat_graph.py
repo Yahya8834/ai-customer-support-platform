@@ -1,8 +1,10 @@
-from langgraph.graph import END, START, StateGraph
 from typing import TypedDict
+from langgraph.graph import END, START, StateGraph
+
 
 
 class ChatState(TypedDict):
+    workspace_uuid: str
     prompt: str
     response: str
 
@@ -24,8 +26,14 @@ class ChatGraph:
 
         return {"response": response}
 
-    def run(self, prompt: str) -> str:
+    def run(
+        self,
+        *,
+        workspace_uuid: str,
+        prompt: str,
+    ) -> str:
         result = self.graph.invoke({
+            "workspace_uuid": workspace_uuid,
             "prompt": prompt,
             "response": "",
         })

@@ -26,7 +26,6 @@ def test_create_embedding(mock_generate):
     assert len(data["embedding"]) == 1024
 
 
-
 def test_create_embedding_requires_text():
     response = client.post(
         "/v1/embeddings",
@@ -34,7 +33,6 @@ def test_create_embedding_requires_text():
     )
 
     assert response.status_code == 422
-
 
 
 def test_create_embedding_rejects_empty_text():
@@ -55,7 +53,6 @@ def test_create_embedding_rejects_whitespace_only_text():
     assert response.status_code == 422
 
 
-
 @patch(
     "app.api.embeddings.embedding_provider.generate",
     side_effect=Exception("model unavailable"),
@@ -71,7 +68,6 @@ def test_create_embedding_handles_provider_failure(
     assert response.status_code == 500
 
 
-
 @patch(
     "app.api.chat.llm_provider.generate",
     return_value="Hello from DeepSeek",
@@ -79,14 +75,16 @@ def test_create_embedding_handles_provider_failure(
 def test_generate_chat(mock_generate):
     response = client.post(
         "/v1/chat",
-        json={"prompt": "hello"},
+        json={
+            "workspace_uuid": "550e8400-e29b-41d4-a716-446655440000",
+            "prompt": "hello",
+        },
     )
 
     assert response.status_code == 200
     assert response.json() == {
         "response": "Hello from DeepSeek",
     }
-
 
 
 @patch(
@@ -96,11 +94,27 @@ def test_generate_chat(mock_generate):
 def test_generate_chat_uses_chat_service(mock_generate):
     response = client.post(
         "/v1/chat",
-        json={"prompt": "hello"},
+        json={
+            "workspace_uuid": "550e8400-e29b-41d4-a716-446655440000",
+            "prompt": "hello",
+        },
     )
 
     assert response.status_code == 200
     assert response.json() == {
         "response": "Hello from service",
     }
-    mock_generate.assert_called_once_with("hello")
+
+    mock_generate.assert_called_once_with(
+        workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
+        prompt="hello",
+    )
+
+
+def test_generate_chat_requires_workspace_uuid():
+    response = client.post(
+        "/v1/chat",
+        json={"prompt": "hello"},
+    )
+
+    assert response.status_code == 422

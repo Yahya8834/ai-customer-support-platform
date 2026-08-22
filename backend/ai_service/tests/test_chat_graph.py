@@ -9,6 +9,9 @@ def test_chat_graph_generates_response():
 
     graph = ChatGraph(llm_provider)
 
-    response = graph.run("hello")
+    response = graph.run(
+        workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
+        prompt="hello",
+    )
 
     assert response == "Hello"
