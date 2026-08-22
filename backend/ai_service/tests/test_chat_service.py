@@ -4,12 +4,12 @@ from app.services.chat import ChatService
 
 
 def test_chat_service_generates_response():
-    llm_provider = Mock()
-    llm_provider.generate.return_value = "Hello"
+    chat_graph = Mock()
+    chat_graph.run.return_value = "Hello"
 
-    service = ChatService(llm_provider)
+    service = ChatService(chat_graph)
 
     response = service.generate("hello")
 
     assert response == "Hello"
-    llm_provider.generate.assert_called_once_with("hello")
+    chat_graph.run.assert_called_once_with("hello")

@@ -1,6 +1,6 @@
 class ChatService:
-    def __init__(self, llm_provider):
-        self.llm_provider = llm_provider
+    def __init__(self, chat_graph):
+        self.chat_graph = chat_graph
 
     def generate(self, prompt: str) -> str:
-        return self.llm_provider.generate(prompt)
+        return self.chat_graph.run(prompt)
