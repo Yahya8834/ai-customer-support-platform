@@ -9,6 +9,8 @@ from apps.documents_processing.models import (
     DocumentEmbedding,
 )
 from apps.ai.retrieval.vector_search import VectorSearch
+from apps.ai.services.retrieval import RetrievalService
+
 
 
 
@@ -131,4 +133,66 @@ class VectorSearchTests(TestCase):
         self.assertEqual(
             len(results),
             1,
+        )
+
+
+
+
+
+class RetrievalServiceTests(TestCase):
+
+    def test_retrieves_relevant_chunks_for_question(self):
+        embedding_provider = Mock()
+        embedding_provider.embed.return_value = [0.1] * 1024
+
+        vector_search = Mock()
+
+        chunk = Mock()
+        vector_search.search.return_value = [chunk]
+
+        service = RetrievalService(
+            embedding_provider=embedding_provider,
+            vector_search=vector_search,
+        )
+
+        results = service.retrieve(
+            workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
+            question="How do I reset my password?",
+        )
+
+        self.assertEqual(results, [chunk])
+
+        embedding_provider.embed.assert_called_once_with(
+            "How do I reset my password?"
+        )
+
+        vector_search.search.assert_called_once_with(
+            workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
+            embedding=[0.1] * 1024,
+            top_k=5,
+        )
+
+
+    def test_retrieves_requested_number_of_chunks(self):
+        embedding_provider = Mock()
+        embedding_provider.embed.return_value = [0.1] * 1024
+
+        vector_search = Mock()
+        vector_search.search.return_value = []
+
+        service = RetrievalService(
+            embedding_provider=embedding_provider,
+            vector_search=vector_search,
+        )
+
+        service.retrieve(
+            workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
+            question="How do I reset my password?",
+            top_k=10,
+        )
+
+        vector_search.search.assert_called_once_with(
+            workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
+            embedding=[0.1] * 1024,
+            top_k=10,
         )
