@@ -9,10 +9,12 @@ class VectorSearch:
         *,
         workspace_uuid: str,
         embedding: list[float],
+        top_k: int = 5,
     ):
         return self._query_database(
             workspace_uuid=workspace_uuid,
             embedding=embedding,
+            top_k=top_k
         )
 
     def _query_database(
@@ -20,6 +22,7 @@ class VectorSearch:
         *,
         workspace_uuid: str,
         embedding: list[float],
+        top_k
     ):
         embeddings = (
             DocumentEmbedding.objects

@@ -96,6 +96,7 @@ class VectorSearchTests(TestCase):
         search._query_database.assert_called_once_with(
             workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
             embedding=embedding,
+            top_k=5
         )
 
 
@@ -115,4 +116,19 @@ class VectorSearchTests(TestCase):
         self.assertEqual(
             results[0].content,
             "Password reset instructions",
+        )
+
+
+    def test_search_limits_results_to_top_k(self):
+        search = VectorSearch()
+
+        results = search.search(
+            workspace_uuid=str(self.workspace.uuid),
+            embedding=self.embedding,
+            top_k=1,
+        )
+
+        self.assertEqual(
+            len(results),
+            1,
         )
