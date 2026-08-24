@@ -97,3 +97,4 @@ class RAGWorkflowTests(TestCase):
             question="What is the refund policy?",
             context="",
         )
+
