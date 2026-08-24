@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, field_validator
 from app.config import settings
-from app.providers.ollama import OllamaEmbeddingProvider
+from app.providers.embedding.ollama import OllamaEmbeddingProvider
 
 
 router = APIRouter()
@@ -27,7 +27,7 @@ class EmbeddingRequest(BaseModel):
 @router.post("/v1/embeddings")
 def create_embedding(request: EmbeddingRequest):
     try:
-        embedding = embedding_provider.generate(request.text)
+        embedding = embedding_provider.embed(request.text)
     except Exception as exc:
         raise HTTPException(
             status_code=500,

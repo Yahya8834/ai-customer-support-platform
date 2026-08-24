@@ -1,6 +1,5 @@
 import httpx
-
-from app.providers.base import EmbeddingProvider
+from app.providers.embedding.base import EmbeddingProvider
 
 
 class OllamaEmbeddingProvider(EmbeddingProvider):
@@ -8,16 +7,19 @@ class OllamaEmbeddingProvider(EmbeddingProvider):
         self.base_url = base_url.rstrip("/")
         self.model = model
 
-    def generate(self, text: str) -> list[float]:
+    def embed(self, text: str) -> list[float]:
+        if not text.strip():
+            raise ValueError("text cannot be empty")
+
         response = httpx.post(
-            f"{self.base_url}/api/embed",
+            f"{self.base_url}/api/embeddings",
             json={
                 "model": self.model,
-                "input": text,
+                "prompt": text,
             },
-            timeout=60.0,
+            timeout=120.0,
         )
 
         response.raise_for_status()
 
-        return response.json()["embeddings"][0]
+        return response.json()["embedding"]

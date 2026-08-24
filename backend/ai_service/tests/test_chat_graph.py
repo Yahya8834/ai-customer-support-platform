@@ -2,7 +2,6 @@ from unittest.mock import Mock
 from app.services.chat_graph import ChatGraph
 
 
-
 def test_chat_graph_generates_response():
     llm_provider = Mock()
     llm_provider.generate.return_value = "Hello"
@@ -15,3 +14,5 @@ def test_chat_graph_generates_response():
     )
 
     assert response == "Hello"
+
+    llm_provider.generate.assert_called_once_with("hello")

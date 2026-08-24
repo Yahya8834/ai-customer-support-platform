@@ -1,5 +1,5 @@
-from app.providers.base import EmbeddingProvider
-from app.providers.ollama import OllamaEmbeddingProvider
+from app.providers.embedding.base import EmbeddingProvider
+from app.providers.embedding.ollama import OllamaEmbeddingProvider
 
 
 def test_ollama_provider_implements_embedding_provider():

@@ -1,10 +1,9 @@
-import os
-from app.providers.ollama import OllamaEmbeddingProvider
-import httpx
-import pytest
+import os, httpx, pytest
+from app.providers.embedding.ollama import OllamaEmbeddingProvider
 
 
 @pytest.mark.integration
+
 def test_ollama_bge_m3_returns_embedding():
     base_url = os.environ["BGE_API_URL"]
     model = os.environ["BGE_MODEL"]
@@ -38,7 +37,7 @@ def test_ollama_embedding_provider_works_with_real_service():
         model=model,
     )
 
-    embedding = provider.generate("hello world")
+    embedding = provider.embed("hello world")
 
     assert isinstance(embedding, list)
     assert len(embedding) > 0

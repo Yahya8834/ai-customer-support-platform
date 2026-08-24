@@ -3,5 +3,5 @@ from abc import ABC, abstractmethod
 
 class EmbeddingProvider(ABC):
     @abstractmethod
-    def generate(self, text: str) -> list[float]:
+    def embed(self, text: str) -> list[float]:
         pass

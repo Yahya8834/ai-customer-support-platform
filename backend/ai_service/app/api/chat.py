@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, field_validator
 from uuid import UUID
+
 from app.config import settings
 from app.providers.llm.ollama import OllamaLLMProvider
 from app.services.chat import ChatService
 from app.services.chat_graph import ChatGraph
-
 
 
 router = APIRouter()
@@ -16,6 +16,7 @@ llm_provider = OllamaLLMProvider(
 )
 
 chat_graph = ChatGraph(llm_provider)
+
 chat_service = ChatService(chat_graph)
 
 

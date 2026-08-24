@@ -22,7 +22,9 @@ class ChatGraph:
         self.graph = builder.compile()
 
     def _generate(self, state: ChatState) -> dict:
-        response = self.llm_provider.generate(state["prompt"])
+        response = self.llm_provider.generate(
+            state["prompt"],
+        )
 
         return {"response": response}
 

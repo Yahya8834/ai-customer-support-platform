@@ -8,7 +8,7 @@ client = TestClient(app)
 
 
 @patch(
-    "app.api.embeddings.embedding_provider.generate",
+    "app.api.embeddings.embedding_provider.embed",
     return_value=[0.1] * 1024,
 )
 def test_create_embedding(mock_generate):
@@ -54,7 +54,7 @@ def test_create_embedding_rejects_whitespace_only_text():
 
 
 @patch(
-    "app.api.embeddings.embedding_provider.generate",
+    "app.api.embeddings.embedding_provider.embed",
     side_effect=Exception("model unavailable"),
 )
 def test_create_embedding_handles_provider_failure(
