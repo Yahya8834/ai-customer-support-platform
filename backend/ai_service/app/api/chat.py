@@ -6,6 +6,8 @@ from app.providers.llm.ollama import OllamaLLMProvider
 from app.services.chat import ChatService
 from app.services.chat_graph import ChatGraph
 from app.providers.llm.factory import LLMProviderFactory
+from app.providers.llm.qwen import QwenLLMProvider
+
 
 
 router = APIRouter()
@@ -14,7 +16,11 @@ llm_provider_factory = LLMProviderFactory(
     providers={
         "deepseek-smart": OllamaLLMProvider(
             base_url=settings.llm_api_url,
-        )
+        ),
+
+        "qwen": QwenLLMProvider(
+            api_key=settings.qwen_inference_key,
+        ),
     }
 )
 
