@@ -3,18 +3,17 @@ from app.providers.llm.base import LLMProvider
 
 
 class OllamaLLMProvider(LLMProvider):
-    def __init__(self, base_url: str, model: str):
+    def __init__(self, base_url: str):
         self.base_url = base_url.rstrip("/")
-        self.model = model
 
-    def generate(self, prompt: str) -> str:
+    def generate(self, prompt: str, model: str) -> str:
         if not prompt.strip():
             raise ValueError("prompt cannot be empty")
 
         response = httpx.post(
             f"{self.base_url}/api/chat",
             json={
-                "model": self.model,
+                "model": model,
                 "messages": [
                     {
                         "role": "user",

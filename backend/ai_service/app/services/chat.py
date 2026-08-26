@@ -6,9 +6,11 @@ class ChatService:
         self,
         *,
         workspace_uuid: str,
+        model: str,
         prompt: str,
     ) -> str:
         return self.chat_graph.run(
             workspace_uuid=workspace_uuid,
+            model=model,
             prompt=prompt,
         )

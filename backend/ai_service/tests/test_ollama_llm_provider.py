@@ -7,7 +7,6 @@ from app.providers.llm.ollama import OllamaLLMProvider
 def test_ollama_llm_provider_implements_llm_provider():
     provider = OllamaLLMProvider(
         base_url="http://testserver",
-        model="deepseek-r1",
     )
 
     assert isinstance(provider, LLMProvider)
@@ -34,10 +33,9 @@ def test_ollama_llm_provider_generates_text(monkeypatch):
 
     provider = OllamaLLMProvider(
         base_url="http://testserver",
-        model="deepseek-r1",
     )
 
-    result = provider.generate("hello")
+    result = provider.generate("hello", "deepseek-r1:8b")
 
     assert result == "Hello from Ollama"
 
@@ -57,11 +55,10 @@ def test_ollama_llm_provider_raises_for_failed_response(monkeypatch):
 
     provider = OllamaLLMProvider(
         base_url="http://testserver",
-        model="deepseek-r1",
     )
 
     with pytest.raises(httpx.HTTPStatusError):
-        provider.generate("hello")
+        provider.generate("hello", "deepseek-r1:8b")
 
 
 
@@ -82,22 +79,20 @@ def test_ollama_llm_provider_requires_message_content(monkeypatch):
 
     provider = OllamaLLMProvider(
         base_url="http://testserver",
-        model="deepseek-r1",
     )
 
     with pytest.raises(KeyError):
-        provider.generate("hello")
+        provider.generate("hello", "deepseek-r1:8b")
 
 
 
 def test_ollama_llm_provider_rejects_empty_prompt():
     provider = OllamaLLMProvider(
         base_url="http://testserver",
-        model="deepseek-r1",
     )
 
     with pytest.raises(ValueError, match="prompt cannot be empty"):
-        provider.generate("   ")
+        provider.generate("   ", "deepseek-r1:8b")
 
 
 
@@ -125,15 +120,14 @@ def test_ollama_llm_provider_sends_model_and_prompt(monkeypatch):
 
     provider = OllamaLLMProvider(
         base_url="http://testserver",
-        model="deepseek-r1",
     )
 
-    result = provider.generate("hello")
+    result = provider.generate("hello", "deepseek-r1:8b")
 
     assert result == "response"
     assert captured["url"] == "http://testserver/api/chat"
     assert captured["json"] == {
-        "model": "deepseek-r1",
+        "model": "deepseek-r1:8b",
         "messages": [
             {
                 "role": "user",

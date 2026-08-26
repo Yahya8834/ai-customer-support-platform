@@ -1,27 +1,31 @@
 from fastapi import APIRouter
 from pydantic import BaseModel, field_validator
 from uuid import UUID
-
 from app.config import settings
 from app.providers.llm.ollama import OllamaLLMProvider
 from app.services.chat import ChatService
 from app.services.chat_graph import ChatGraph
+from app.providers.llm.factory import LLMProviderFactory
 
 
 router = APIRouter()
 
-llm_provider = OllamaLLMProvider(
-    base_url=settings.llm_api_url,
-    model=settings.llm_model,
+llm_provider_factory = LLMProviderFactory(
+    providers={
+        "deepseek-smart": OllamaLLMProvider(
+            base_url=settings.llm_api_url,
+        )
+    }
 )
 
-chat_graph = ChatGraph(llm_provider)
+chat_graph = ChatGraph(llm_provider_factory)
 
 chat_service = ChatService(chat_graph)
 
 
 class ChatRequest(BaseModel):
     workspace_uuid: UUID
+    model: str
     prompt: str
 
     @field_validator("prompt")
@@ -37,6 +41,7 @@ class ChatRequest(BaseModel):
 def generate_chat(request: ChatRequest):
     response = chat_service.generate(
         workspace_uuid=str(request.workspace_uuid),
+        model=request.model,
         prompt=request.prompt,
     )
     return {"response": response}

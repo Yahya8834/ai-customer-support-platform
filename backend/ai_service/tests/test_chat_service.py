@@ -10,6 +10,7 @@ def test_chat_service_generates_response():
 
     response = service.generate(
         workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
+        model="deepseek-smart",
         prompt="hello",
     )
 
@@ -17,5 +18,6 @@ def test_chat_service_generates_response():
 
     chat_graph.run.assert_called_once_with(
         workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
+        model="deepseek-smart",
         prompt="hello",
     )

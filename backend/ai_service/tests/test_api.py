@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from app.main import app
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 
 
@@ -69,21 +69,26 @@ def test_create_embedding_handles_provider_failure(
 
 
 @patch(
-    "app.api.chat.llm_provider.generate",
+    "app.api.chat.llm_provider_factory.get",
     return_value="Hello from DeepSeek",
 )
-def test_generate_chat(mock_generate):
+def test_generate_chat(mock_factory_get):
+    mock_provider = MagicMock()
+    mock_provider.generate.return_value = "Hello from service"
+    mock_factory_get.return_value = mock_provider
+
     response = client.post(
         "/v1/chat",
         json={
             "workspace_uuid": "550e8400-e29b-41d4-a716-446655440000",
+            "model": "deepseek-smart",
             "prompt": "hello",
         },
     )
 
     assert response.status_code == 200
     assert response.json() == {
-        "response": "Hello from DeepSeek",
+        "response": "Hello from service",
     }
 
 
@@ -96,6 +101,7 @@ def test_generate_chat_uses_chat_service(mock_generate):
         "/v1/chat",
         json={
             "workspace_uuid": "550e8400-e29b-41d4-a716-446655440000",
+            "model": "deepseek-smart",
             "prompt": "hello",
         },
     )
@@ -107,6 +113,7 @@ def test_generate_chat_uses_chat_service(mock_generate):
 
     mock_generate.assert_called_once_with(
         workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
+        model="deepseek-smart",
         prompt="hello",
     )
 
