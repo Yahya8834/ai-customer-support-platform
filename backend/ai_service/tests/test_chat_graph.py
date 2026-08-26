@@ -26,4 +26,5 @@ def test_chat_graph_generates_response():
 
     llm_provider.generate.assert_called_once_with(
         "hello",
+        "deepseek-smart"
     )

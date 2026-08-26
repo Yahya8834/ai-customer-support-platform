@@ -29,6 +29,7 @@ class ChatGraph:
 
         response = llm_provider.generate(
             state["prompt"],
+            state["model"],
         )
 
         return {"response": response}

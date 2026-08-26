@@ -8,5 +8,7 @@ class Settings:
         
         self.llm_api_url = os.environ["LLM_API_URL"]
 
+        self.qwen_inference_key = os.environ["QWEN_INFERENCE_KEY"]
+
 
 settings = Settings()
