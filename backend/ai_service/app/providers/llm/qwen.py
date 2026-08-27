@@ -1,5 +1,7 @@
+from collections.abc import Iterator
 from openai import OpenAI
 from app.providers.llm.base import LLMProvider
+
 
 
 
@@ -10,11 +12,10 @@ class QwenLLMProvider(LLMProvider):
             api_key=api_key,
         )
 
-
     def generate(self, prompt: str, model: str) -> str:
         if not prompt.strip():
             raise ValueError("prompt cannot be empty")
-        
+
         response = self.client.chat.completions.create(
             model=model,
             messages=[
@@ -31,3 +32,27 @@ class QwenLLMProvider(LLMProvider):
             raise ValueError("response content is missing")
 
         return content
+
+    def stream(self, prompt: str, model: str) -> Iterator[str]:
+        if not prompt.strip():
+            raise ValueError("prompt cannot be empty")
+
+        response = self.client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ],
+            stream=True,
+        )
+
+        for chunk in response:
+            if not chunk.choices:
+                continue
+
+            content = chunk.choices[0].delta.content
+
+            if content:
+                yield content
