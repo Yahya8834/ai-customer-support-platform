@@ -5,6 +5,7 @@ from langgraph.graph import END, START, StateGraph
 
 class ChatState(TypedDict):
     workspace_uuid: str
+    provider: str
     model: str
     prompt: str
     response: str
@@ -24,7 +25,7 @@ class ChatGraph:
 
     def _generate(self, state: ChatState) -> dict:
         llm_provider = self.llm_provider_factory.get(
-            state["model"],
+            state["provider"],
         )
 
         response = llm_provider.generate(
@@ -38,13 +39,15 @@ class ChatGraph:
         self,
         *,
         workspace_uuid: str,
-        model:str,
+        provider: str,
+        model: str,
         prompt: str,
     ) -> str:
         result = self.graph.invoke({
             "workspace_uuid": workspace_uuid,
+            "provider": provider,
+            "model": model,
             "prompt": prompt,
-            "model":model,
             "response": "",
         })
 

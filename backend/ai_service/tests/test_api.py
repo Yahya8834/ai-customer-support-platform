@@ -81,7 +81,8 @@ def test_generate_chat(mock_factory_get):
         "/v1/chat",
         json={
             "workspace_uuid": "550e8400-e29b-41d4-a716-446655440000",
-            "model": "deepseek-smart",
+            "provider": "ollama",
+            "model": "deepseek-r1:8b",
             "prompt": "hello",
         },
     )
@@ -101,9 +102,10 @@ def test_generate_chat_uses_chat_service(mock_generate):
         "/v1/chat",
         json={
             "workspace_uuid": "550e8400-e29b-41d4-a716-446655440000",
-            "model": "deepseek-smart",
+            "provider": "ollama",
+            "model": "deepseek-r1:8b",
             "prompt": "hello",
-        },
+        }
     )
 
     assert response.status_code == 200
@@ -113,7 +115,8 @@ def test_generate_chat_uses_chat_service(mock_generate):
 
     mock_generate.assert_called_once_with(
         workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
-        model="deepseek-smart",
+        provider="ollama",
+        model="deepseek-r1:8b",
         prompt="hello",
     )
 
@@ -121,7 +124,11 @@ def test_generate_chat_uses_chat_service(mock_generate):
 def test_generate_chat_requires_workspace_uuid():
     response = client.post(
         "/v1/chat",
-        json={"prompt": "hello"},
+        json={
+            "provider": "ollama",
+            "model": "deepseek-r1:8b",
+            "prompt": "hello",
+        }
     )
 
     assert response.status_code == 422

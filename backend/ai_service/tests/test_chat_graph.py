@@ -14,17 +14,18 @@ def test_chat_graph_generates_response():
 
     response = graph.run(
         workspace_uuid="550e8400-e29b-41d4-a716-446655440000",
-        model="deepseek-smart",
+        provider="ollama",
+        model="deepseek-r1:8b",
         prompt="hello",
     )
 
     assert response == "Hello"
 
     llm_provider_factory.get.assert_called_once_with(
-        "deepseek-smart",
+        "ollama",
     )
 
     llm_provider.generate.assert_called_once_with(
         "hello",
-        "deepseek-smart"
+        "deepseek-r1:8b",
     )

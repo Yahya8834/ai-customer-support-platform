@@ -14,7 +14,7 @@ router = APIRouter()
 
 llm_provider_factory = LLMProviderFactory(
     providers={
-        "deepseek-smart": OllamaLLMProvider(
+        "ollama": OllamaLLMProvider(
             base_url=settings.llm_api_url,
         ),
 
@@ -31,6 +31,7 @@ chat_service = ChatService(chat_graph)
 
 class ChatRequest(BaseModel):
     workspace_uuid: UUID
+    provider: str
     model: str
     prompt: str
 
@@ -41,12 +42,13 @@ class ChatRequest(BaseModel):
             raise ValueError("prompt cannot be empty")
 
         return value
-
+    
 
 @router.post("/v1/chat")
 def generate_chat(request: ChatRequest):
     response = chat_service.generate(
         workspace_uuid=str(request.workspace_uuid),
+        provider=request.provider,
         model=request.model,
         prompt=request.prompt,
     )
