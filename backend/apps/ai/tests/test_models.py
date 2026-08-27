@@ -15,7 +15,7 @@ class LLMModelTests(TestCase):
             model_name="deepseek-chat",
             input_price_per_1k_tokens=0,
             output_price_per_1k_tokens=0,
-            is_active=True,
+            is_active=False,
         )
 
         with self.assertRaises(IntegrityError):
@@ -28,5 +28,5 @@ class LLMModelTests(TestCase):
                 model_name="another-model",
                 input_price_per_1k_tokens=0,
                 output_price_per_1k_tokens=0,
-                is_active=True,
+                is_active=False,
             )

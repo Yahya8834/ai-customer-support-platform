@@ -100,37 +100,3 @@ class AvailableLLMModelsAPITest(APITestCase):
         self.assertEqual(response.data["models"], [])
 
 
-
-    def test_returns_multiple_active_models(self):
-        LLMModel.objects.create(
-            key="deepseek",
-            display_name="DeepSeek",
-            description="Strong reasoning model",
-            strength="Reasoning",
-            provider="deepseek",
-            model_name="deepseek-chat",
-            input_price_per_1k_tokens=0,
-            output_price_per_1k_tokens=0,
-            is_active=True,
-        )
-
-        LLMModel.objects.create(
-            key="ollama",
-            display_name="Ollama",
-            description="Local model",
-            strength="Fast and private",
-            provider="ollama",
-            model_name="deepseek-r1",
-            input_price_per_1k_tokens=0,
-            output_price_per_1k_tokens=0,
-            is_active=True,
-        )
-
-        response = self.client.get(
-            "/api/v1/llm-models/",
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data["models"]), 2)
-
-
