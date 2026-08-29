@@ -1,7 +1,8 @@
 from celery import shared_task
 from django.conf import settings
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from apps.common.integrations.ai_service.client import AIServiceClient
-
 
 
 @shared_task
@@ -11,12 +12,16 @@ def process_chat_message(
     model: str,
     prompt: str,
 ) -> None:
-
-    print(">>> CELERY TASK STARTED <<<", flush=True)
-
+    
     client = AIServiceClient(
         settings.AI_SERVICE_URL,
     )
+
+    channel_layer = get_channel_layer()
+    group_name = f"workspace_{workspace_uuid}"
+
+    print(f">>> CELERY GROUP: {group_name}", flush=True)
+    print(f">>> CHANNEL LAYER: {channel_layer}", flush=True)
 
     for chunk in client.chat_stream(
         workspace_uuid=workspace_uuid,
@@ -24,4 +29,14 @@ def process_chat_message(
         model=model,
         prompt=prompt,
     ):
-        print(repr(chunk), flush=True)
+        print(f">>> SENDING TOKEN: {chunk!r}", flush=True)
+        
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                "type": "chat_message",
+                "token": chunk,
+            },
+
+            
+        )
