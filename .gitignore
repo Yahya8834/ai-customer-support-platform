@@ -1,1 +1,82 @@
-backend/ai_service/.env
+# =========================
+# Environment / Secrets
+# =========================
+
+.env
+.env.*
+!.env.example
+
+
+# =========================
+# Python
+# =========================
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+
+# =========================
+# Django
+# =========================
+
+*.log
+
+# User-uploaded/generated media
+media/
+
+# Collected static files
+staticfiles/
+
+
+# =========================
+# Uploaded Documents
+# =========================
+
+# Runtime document uploads
+backend/documents/*
+
+# Keep the directory itself available in Git if needed
+!backend/documents/.gitkeep
+
+
+# =========================
+# Frontend
+# =========================
+
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.vite/
+
+
+# =========================
+# IDE / Editors
+# =========================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+
+# =========================
+# OS
+# =========================
+
+.DS_Store
+Thumbs.db
