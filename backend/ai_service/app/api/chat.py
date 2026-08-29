@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, field_validator
 from uuid import UUID
 from app.config import settings
+from fastapi.responses import StreamingResponse
 from app.providers.llm.ollama import OllamaLLMProvider
 from app.services.chat import ChatService
 from app.services.chat_graph import ChatGraph
@@ -53,3 +54,19 @@ def generate_chat(request: ChatRequest):
         prompt=request.prompt,
     )
     return {"response": response}
+
+
+
+@router.post("/v1/chat/stream")
+def stream_chat(request: ChatRequest):
+    chunks = chat_service.stream(
+        workspace_uuid=str(request.workspace_uuid),
+        provider=request.provider,
+        model=request.model,
+        prompt=request.prompt,
+    )
+
+    return StreamingResponse(
+        chunks,
+        media_type="text/plain",
+    )

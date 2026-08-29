@@ -52,3 +52,20 @@ class ChatGraph:
         })
 
         return result["response"]
+    
+    def stream(
+        self,
+        *,
+        workspace_uuid: str,
+        provider: str,
+        model: str,
+        prompt: str,
+    ):
+        llm_provider = self.llm_provider_factory.get(
+            provider,
+        )
+
+        return llm_provider.stream(
+            prompt,
+            model,
+        )

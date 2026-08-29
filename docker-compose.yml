@@ -101,6 +101,21 @@ services:
     ports:
       - "6379:6379"
 
+  celery_worker:
+    build:
+      context: .
+      dockerfile: docker/django/Dockerfile
+    container_name: customer-support-celery-worker
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - rabbitmq
+      - redis
+    command: celery -A config.celery worker --loglevel=info --pool=solo --without-gossip
+    
 volumes:
   postgres_data:
   rabbitmq_data:
