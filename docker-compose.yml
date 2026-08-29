@@ -90,11 +90,32 @@ services:
     container_name: ai_service
     env_file:
       - ./backend/ai_service/.env
-    expose:
-      - "8001"
+    ports:
+      - "8001:8001"
     volumes:
       - ./backend/ai_service:/app
 
+  redis:
+    image: redis:8-alpine
+    container_name: customer-support-redis
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: docker/django/Dockerfile
+    container_name: customer-support-celery-worker
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - rabbitmq
+      - redis
+    command: celery -A config.celery worker --loglevel=info --pool=solo --without-gossip
+    
 volumes:
   postgres_data:
   rabbitmq_data:

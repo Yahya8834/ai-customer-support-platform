@@ -18,7 +18,10 @@ class DocumentNotFoundError(Exception):
     pass
 
 
-
 class EmbeddingGenerationError(Exception):
     """Raised when there is an error generating embeddings."""
     pass
+
+
+class AIServiceError(Exception):
+    """Raised when communication with the AI service fails."""

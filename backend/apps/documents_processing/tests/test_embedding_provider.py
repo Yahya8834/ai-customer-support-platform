@@ -1,4 +1,3 @@
-import httpx
 from django.test import TestCase
 from apps.common.exceptions import EmbeddingGenerationError
 from apps.documents_processing.providers.generate_embeddings import (
@@ -56,76 +55,63 @@ class EmbeddingProviderTests(TestCase):
 
 
 
-    def test_provider_wraps_generation_errors(self):
+    @patch("apps.documents_processing.providers.generate_embeddings.AIServiceClient")
+    def test_provider_wraps_generation_errors(self, mock_client):
+        mock_client.return_value.embed.side_effect = Exception(
+            "model failed"
+        )
 
-        provider = self.provider
-
-        provider._generate_embedding = lambda text: (
-            (_ for _ in ()).throw(Exception("model failed"))
+        provider = GenerateEmbeddingsProvider(
+            base_url="http://ai_service:8001",
         )
 
         with self.assertRaises(EmbeddingGenerationError):
             provider.embed("test document")
-                
+                    
 
 
-    @patch("apps.documents_processing.providers.generate_embeddings.httpx.post")
-    def test_provider_calls_ai_service(self, mock_post):
-        mock_post.return_value.json.return_value = {
-            "embedding": [0.1] * 1024,
-        }
-        mock_post.return_value.raise_for_status.return_value = None
+    @patch(
+        "apps.documents_processing.providers.generate_embeddings.AIServiceClient"
+    )
+    def test_provider_rejects_invalid_embedding_dimension(
+        self,
+        mock_client,
+    ):
+        mock_client.return_value.embed.return_value = [
+            0.1,
+            0.2,
+            0.3,
+        ]
 
-        provider = self.provider
+        provider = GenerateEmbeddingsProvider(
+            base_url="http://ai_service:8001",
+        )
 
-        vector = provider.embed("test document")
+        with self.assertRaises(EmbeddingGenerationError):
+            provider.embed("test document")
 
-        mock_post.assert_called_once_with(
-            "http://ai_service:8001/v1/embeddings",
-            json={"text": "test document"},
-            timeout=60.0,
+
+    @patch(
+        "apps.documents_processing.providers.generate_embeddings.AIServiceClient"
+    )
+    def test_provider_uses_ai_service_client(self, mock_client):
+        mock_client.return_value.embed.return_value = [0.1] * 1024
+
+        provider = GenerateEmbeddingsProvider(
+            base_url="http://ai_service:8001",
+        )
+
+        result = provider.embed("test document")
+
+        mock_client.assert_called_once_with(
+            base_url="http://ai_service:8001",
+        )
+
+        mock_client.return_value.embed.assert_called_once_with(
+            "test document",
         )
 
         self.assertEqual(
-            vector,
+            result,
             [0.1] * 1024,
         )
-
-
-
-    @patch("apps.documents_processing.providers.generate_embeddings.httpx.post")
-    def test_provider_wraps_http_errors(self, mock_post):
-        mock_post.side_effect = httpx.HTTPError("AI service unavailable")
-
-        provider = self.provider
-
-        with self.assertRaises(EmbeddingGenerationError):
-            provider.embed("test document")
-
-
-
-    @patch("apps.documents_processing.providers.generate_embeddings.httpx.post")
-    def test_provider_rejects_response_without_embedding(self, mock_post):
-        mock_post.return_value.json.return_value = {
-            "wrong_field": [],
-        }
-        mock_post.return_value.raise_for_status.return_value = None
-
-        provider = self.provider
-
-        with self.assertRaises(EmbeddingGenerationError):
-            provider.embed("test document")
-
-
-        
-    @patch("apps.documents_processing.providers.generate_embeddings.httpx.post")
-    def test_provider_rejects_invalid_embedding_dimension(self, mock_post):
-        mock_post.return_value.json.return_value = {
-            "embedding": [0.1, 0.2, 0.3],
-        }
-        mock_post.return_value.raise_for_status.return_value = None
-
-        provider = self.provider
-
-        with self.assertRaises(EmbeddingGenerationError):
-            provider.embed("test document")

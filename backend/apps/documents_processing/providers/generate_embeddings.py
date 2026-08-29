@@ -1,12 +1,13 @@
-import httpx
 from apps.common.exceptions import EmbeddingGenerationError
-
+from apps.common.integrations.ai_service.client import AIServiceClient
 
 
 class GenerateEmbeddingsProvider:
 
     def __init__(self, base_url: str):
-        self.base_url = base_url.rstrip("/")
+        self.client = AIServiceClient(
+            base_url=base_url,
+        )
 
     def embed(self, text: str) -> list[float]:
         if not text.strip():
@@ -15,32 +16,19 @@ class GenerateEmbeddingsProvider:
             )
 
         try:
-            return self._generate_embedding(text)
+            embedding = self.client.embed(text)
+
+            if len(embedding) != 1024:
+                raise ValueError(
+                    "Invalid embedding dimension"
+                )
+
+            return embedding
 
         except Exception as exc:
             raise EmbeddingGenerationError(
                 "Failed to generate embedding"
             ) from exc
-        
-
-    def _generate_embedding(self, text: str) -> list[float]:
-        response = httpx.post(
-            f"{self.base_url}/v1/embeddings",
-            json={"text": text},
-            timeout=60.0,
-        )
-
-        response.raise_for_status()
-
-        embedding = response.json()["embedding"]
-
-        if len(embedding) != 1024:
-            raise ValueError(
-                "Invalid embedding dimension"
-            )
-
-        return embedding
-    
 
     def metadata(self) -> dict:
         return {

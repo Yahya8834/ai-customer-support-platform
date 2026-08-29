@@ -35,6 +35,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+
     # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,7 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-     # Third-party apps
+
+    # Third-party apps
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
 
@@ -52,6 +55,8 @@ INSTALLED_APPS = [
     "apps.workspaces.apps.WorkspacesConfig",
     "apps.documents.apps.DocumentsConfig",
     "apps.documents_processing.apps.DocumentsProcessingConfig",
+    "apps.ai.apps.AiConfig",
+    "apps.chat.apps.ChatConfig",
 ]
 
 MIDDLEWARE = [
@@ -83,6 +88,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
+ASGI_APPLICATION = 'config.asgi.application'
 
 
 # Database
@@ -159,3 +165,28 @@ SIMPLE_JWT = {
 }
 
 AI_SERVICE_URL = env("AI_SERVICE_URL")
+
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                {
+                    "host": "redis",
+                    "port": 6379,
+                    "socket_timeout": None,
+                },
+            ],
+        },
+    },
+}
+
+CELERY_BROKER_URL = env("CELERY_BROKER_URL")
+CELERY_TASK_DEFAULT_QUEUE = "celery"
+CELERY_TASK_DEFAULT_EXCHANGE = "celery"
+CELERY_TASK_DEFAULT_EXCHANGE_TYPE = "direct"
+CELERY_TASK_DEFAULT_ROUTING_KEY = "celery"
+CELERY_TASK_DEFAULT_QUEUE_DURABLE = True
+CELERY_CONTROL_QUEUE_DURABLE = True

@@ -1,5 +1,5 @@
 import httpx
-from  app.providers.ollama import OllamaEmbeddingProvider
+from app.providers.embedding.ollama import OllamaEmbeddingProvider
 
 
 def test_ollama_embedding_provider_returns_embedding(monkeypatch):
@@ -7,9 +7,7 @@ def test_ollama_embedding_provider_returns_embedding(monkeypatch):
         return httpx.Response(
             200,
             json={
-                "embeddings": [
-                    [0.1, 0.2, 0.3],
-                ]
+                "embedding": [0.1, 0.2, 0.3,]
             },
             request=httpx.Request(
                 "POST",
@@ -24,7 +22,7 @@ def test_ollama_embedding_provider_returns_embedding(monkeypatch):
         model="bge-m3:567m",
     )
 
-    result = provider.generate("hello")
+    result = provider.embed("hello")
 
     assert result == [0.1, 0.2, 0.3]
 
