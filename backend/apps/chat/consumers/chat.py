@@ -1,5 +1,6 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from apps.chat.tasks import process_chat_message
 
 
 
@@ -27,6 +28,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(
             self.group_name,
             self.channel_name,
+        )
+
+    async def receive(self, text_data=None, bytes_data=None):
+        data = json.loads(text_data)
+
+        process_chat_message.delay(
+            workspace_uuid=str(self.workspace_uuid),
+            provider=data["provider"],
+            model=data["model"],
+            prompt=data["prompt"],
         )
 
     async def chat_message(self, event):

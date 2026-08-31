@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/', include('apps.workspaces.api.v1.urls')),
     path('api/', include('apps.documents.api.v1.urls')),
     path('api/', include('apps.ai.api.v1.urls')),
+    path('api/', include('apps.chat.api.v1.urls'))
 ]
