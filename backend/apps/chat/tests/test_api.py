@@ -306,6 +306,28 @@ class ConversationMessageListAPITests(APITestCase):
             status.HTTP_404_NOT_FOUND,
         )
 
+    def test_non_member_cannot_list_conversation_messages(self):
+        outsider = User.objects.create_user(
+            username="outsider",
+            email="outsider@example.com",
+            password="password123",
+        )
+
+        outsider_token = str(
+            RefreshToken.for_user(outsider).access_token
+        )
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {outsider_token}"
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
 
 class MessageSerializerTests(TestCase):
 
