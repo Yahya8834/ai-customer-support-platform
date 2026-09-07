@@ -7,6 +7,8 @@ from apps.chat.models.conversation import Conversation
 from apps.chat.models.message import Message
 from apps.workspaces.models import Workspace, WorkspaceMembership
 from apps.accounts.models import User
+from unittest.mock import patch
+from asyncio import sleep
 
 
 
@@ -101,8 +103,6 @@ class ChatConsumerTests(TransactionTestCase):
 
         await communicator.send_json_to({
             "conversation_uuid": conversation_uuid,
-            "provider": "openrouter",
-            "model": "qwen",
             "prompt": "Hello, support!",
         })
 
@@ -147,8 +147,6 @@ class ChatConsumerTests(TransactionTestCase):
 
         await communicator.send_json_to({
             "conversation_uuid": str(conversation.uuid),
-            "provider": "openrouter",
-            "model": "qwen",
             "prompt": "This should not be accepted.",
         })
 
@@ -168,3 +166,47 @@ class ChatConsumerTests(TransactionTestCase):
         )
 
         self.assertEqual(messages, [])
+
+    @patch("apps.chat.consumers.chat.process_chat_message")
+    async def test_received_message_dispatches_chat_task(
+        self,
+        mock_task,
+    ):
+        workspace = await database_sync_to_async(
+            Workspace.objects.create
+        )(
+            name="Test Workspace",
+            slug="test-workspace-dispatch",
+        )
+
+        conversation = await database_sync_to_async(
+            Conversation.objects.create
+        )(
+            workspace=workspace,
+        )
+
+        communicator = WebsocketCommunicator(
+            application,
+            f"/ws/v1/chat/{workspace.uuid}/",
+        )
+
+        connected, _ = await communicator.connect()
+
+        self.assertTrue(connected)
+
+        await communicator.receive_from()
+
+        await communicator.send_json_to({
+            "conversation_uuid": str(conversation.uuid),
+            "prompt": "Hello, support!",
+        })
+
+        await sleep(0.1)
+
+        mock_task.delay.assert_called_once_with(
+            workspace_uuid=str(workspace.uuid),
+            conversation_uuid=str(conversation.uuid),
+            prompt="Hello, support!",
+        )
+
+        await communicator.disconnect()

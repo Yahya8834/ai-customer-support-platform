@@ -145,6 +145,106 @@ class ConversationListAPITests(APITestCase):
         )
         
 
+class ConversationCreateAPITests(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="member",
+            email="member@example.com",
+            password="password123",
+        )
+
+        refresh = RefreshToken.for_user(self.user)
+        self.access_token = str(refresh.access_token)
+
+        self.workspace = Workspace.objects.create(
+            name="Workspace A",
+            slug="workspace-a",
+        )
+
+        WorkspaceMembership.objects.create(
+            workspace=self.workspace,
+            user=self.user,
+            role=WorkspaceRole.OWNER,
+        )
+
+        self.url = (
+            f"/api/v1/workspaces/"
+            f"{self.workspace.uuid}/conversations/"
+        )
+
+    def authenticate(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
+        )
+
+    def test_workspace_member_can_create_conversation(self):
+        self.authenticate()
+
+        response = self.client.post(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+        )
+
+        conversation = Conversation.objects.get(
+            uuid=response.data["uuid"],
+        )
+
+        self.assertEqual(
+            conversation.workspace_id,
+            self.workspace.uuid,
+        )
+
+    def test_non_member_cannot_create_conversation(self):
+        outsider = User.objects.create_user(
+            username="outsider",
+            email="outsider@example.com",
+            password="password123",
+        )
+
+        outsider_token = str(
+            RefreshToken.for_user(outsider).access_token
+        )
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {outsider_token}"
+        )
+
+        response = self.client.post(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+    def test_unauthenticated_user_cannot_create_conversation(self):
+        response = self.client.post(self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )
+
+    def test_nonexistent_workspace_returns_404(self):
+        self.authenticate()
+
+        nonexistent_workspace_uuid = (
+            "550e8400-e29b-41d4-a716-446655440000"
+        )
+
+        response = self.client.post(
+            f"/api/v1/workspaces/"
+            f"{nonexistent_workspace_uuid}/conversations/"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+
 class ConversationSerializerTests(TestCase):
 
     def setUp(self):

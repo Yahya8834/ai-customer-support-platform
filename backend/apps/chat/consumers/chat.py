@@ -59,8 +59,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         process_chat_message.delay(
             workspace_uuid=str(self.workspace_uuid),
-            provider=data["provider"],
-            model=data["model"],
+            conversation_uuid=data["conversation_uuid"],
             prompt=data["prompt"],
         )
 

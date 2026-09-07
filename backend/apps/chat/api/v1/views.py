@@ -37,6 +37,28 @@ class ConversationListView(APIView):
 
         return Response(serializer.data)
     
+    def post(self, request, workspace_uuid):
+        workspace = get_object_or_404(
+            Workspace,
+            uuid=workspace_uuid,
+        )
+
+        check_workspace_access(
+            actor=request.user,
+            workspace=workspace,
+        )
+
+        conversation = Conversation.objects.create(
+            workspace=workspace,
+        )
+
+        serializer = ConversationSerializer(conversation)
+
+        return Response(
+            serializer.data,
+            status=201,
+        )
+    
 
 class ConversationMessageListView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -68,3 +90,4 @@ class ConversationMessageListView(APIView):
         )
 
         return Response(serializer.data)
+    

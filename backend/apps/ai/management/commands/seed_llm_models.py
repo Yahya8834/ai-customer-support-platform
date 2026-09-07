@@ -28,7 +28,7 @@ class Command(BaseCommand):
                 "model_name": "qwen3.5-397b-a17b",
                 "input_price_per_1k_tokens": 0.000550,
                 "output_price_per_1k_tokens": 0.003500,
-                "is_active": False,
+                "is_active": True,
             },
         ]
 
