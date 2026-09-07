@@ -5,7 +5,8 @@ from config.asgi import application
 from channels.db import database_sync_to_async
 from apps.chat.models.conversation import Conversation
 from apps.chat.models.message import Message
-from apps.workspaces.models import Workspace
+from apps.workspaces.models import Workspace, WorkspaceMembership
+from apps.accounts.models import User
 
 
 
@@ -119,21 +120,51 @@ class ChatConsumerTests(TransactionTestCase):
         self.assertEqual(messages[0].role, "user")
         self.assertEqual(messages[0].content, "Hello, support!")
 
-    # async def test_unauthenticated_user_cannot_connect_to_workspace_chat(self):
-    #     workspace = await database_sync_to_async(Workspace.objects.create)(
-    #         name="Test Workspace",
-    #         slug="test-workspace",
-    #     )
+    async def test_message_cannot_be_sent_to_conversation_from_another_workspace(self):
+        workspace_a = await database_sync_to_async(Workspace.objects.create)(
+            name="Workspace A",
+            slug="workspace-a",
+        )
 
-    #     communicator = WebsocketCommunicator(
-    #         application,
-    #         f"/ws/v1/chat/{workspace.uuid}/",
-    #     )
+        workspace_b = await database_sync_to_async(Workspace.objects.create)(
+            name="Workspace B",
+            slug="workspace-b",
+        )
 
-    #     connected, _ = await communicator.connect()
+        conversation = await database_sync_to_async(Conversation.objects.create)(
+            workspace=workspace_b,
+        )
 
-    #     self.assertFalse(connected)
+        communicator = WebsocketCommunicator(
+            application,
+            f"/ws/v1/chat/{workspace_a.uuid}/",
+        )
 
-    #     await communicator.disconnect()
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
 
-        
+        await communicator.receive_from()
+
+        await communicator.send_json_to({
+            "conversation_uuid": str(conversation.uuid),
+            "provider": "openrouter",
+            "model": "qwen",
+            "prompt": "This should not be accepted.",
+        })
+
+        response = await communicator.receive_json_from()
+
+        self.assertEqual(
+            response,
+            {
+                "error": "Conversation does not belong to this workspace.",
+            },
+        )
+
+        await communicator.disconnect()
+
+        messages = await database_sync_to_async(list)(
+            Message.objects.all()
+        )
+
+        self.assertEqual(messages, [])
