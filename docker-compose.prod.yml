@@ -65,10 +65,10 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
 
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+    interval: 15s
+    timeout: 15s
+    retries: 5
 
   ai_service:
     build:
