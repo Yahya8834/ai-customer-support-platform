@@ -1,0 +1,145 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/django/Dockerfile
+      args:
+        REQUIREMENTS_FILE: production.txt
+
+    container_name: customer-support-web
+
+    env_file:
+      - .env.prod
+
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+
+    command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
+  
+  db:
+    image: pgvector/pgvector:pg17
+
+    container_name: customer-support-db
+
+    restart: unless-stopped
+
+    env_file:
+      - .env.prod
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  redis:
+    image: redis:8-alpine
+
+    container_name: customer-support-redis
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:4-management
+
+    container_name: customer-support-rabbitmq
+
+    restart: unless-stopped
+
+    env_file:
+      - .env.prod
+
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ai_service:
+    build:
+      context: ./backend/ai_service
+      dockerfile: Dockerfile
+
+    container_name: ai_service
+
+    env_file:
+      - ./backend/ai_service/.env.ai.prod
+
+    restart: unless-stopped
+
+    expose:
+      - "8001"
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: docker/django/Dockerfile
+      args:
+        REQUIREMENTS_FILE: production.txt
+
+    container_name: customer-support-celery-worker
+
+    env_file:
+      - .env.prod
+
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+
+    restart: unless-stopped
+
+    depends_on:
+      db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai_service:
+        condition: service_healthy
+
+    command: celery -A config.celery worker --loglevel=info --pool=solo --without-gossip
+  
+  nginx:
+    image: nginx:alpine
+    container_name: customer-support-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  rabbitmq_data:

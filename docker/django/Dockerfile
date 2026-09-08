@@ -12,8 +12,10 @@ RUN apt-get update && apt-get install -y \
 
 COPY backend/requirements/ requirements/
 
+ARG REQUIREMENTS_FILE=development.txt
+
 RUN pip install --upgrade pip && \
-    pip install -r requirements/development.txt
+    pip install --no-cache-dir -r requirements/${REQUIREMENTS_FILE}
 
 COPY backend/ .
 

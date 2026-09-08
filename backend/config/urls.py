@@ -16,6 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
+
+
+
+def health_check(request):
+    return JsonResponse({"status": "ok"})
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,5 +30,6 @@ urlpatterns = [
     path('api/', include('apps.workspaces.api.v1.urls')),
     path('api/', include('apps.documents.api.v1.urls')),
     path('api/', include('apps.ai.api.v1.urls')),
-    path('api/', include('apps.chat.api.v1.urls'))
+    path('api/', include('apps.chat.api.v1.urls')),
+    path("api/v1/health/", health_check),
 ]
