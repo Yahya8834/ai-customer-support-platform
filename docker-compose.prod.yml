@@ -103,6 +103,8 @@ services:
         REQUIREMENTS_FILE: production.txt
 
     container_name: customer-support-celery-worker
+    
+    user: "www-data"
 
     env_file:
       - .env.prod
@@ -123,7 +125,7 @@ services:
         condition: service_healthy
 
     command: celery -A config.celery worker --loglevel=info --pool=solo --without-gossip
-    
+
   nginx:
     image: nginx:alpine
     container_name: customer-support-nginx
