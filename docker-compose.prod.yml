@@ -49,9 +49,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
-
     container_name: customer-support-rabbitmq
-
     restart: unless-stopped
 
     env_file:
@@ -65,10 +63,10 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
 
     healthcheck:
-    test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-    interval: 15s
-    timeout: 15s
-    retries: 5
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 15s
+      retries: 5
 
   ai_service:
     build:
@@ -125,7 +123,7 @@ services:
         condition: service_healthy
 
     command: celery -A config.celery worker --loglevel=info --pool=solo --without-gossip
-  
+    
   nginx:
     image: nginx:alpine
     container_name: customer-support-nginx
