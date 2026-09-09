@@ -18,6 +18,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Create CI environment
+        run: |
+          cat > .env <<'EOF'
+          SECRET_KEY=ci-test-secret-key
+          DEBUG=True
+          ALLOWED_HOSTS=localhost,127.0.0.1
+          DATABASE_URL=postgresql://postgres:postgres@db:5432/customer_support
+          AI_SERVICE_URL=http://ai_service:8001
+          CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+          RABBITMQ_DEFAULT_USER=guest
+          RABBITMQ_DEFAULT_PASS=guest
+          EOF
+
       - name: Build development containers
         run: docker compose build
 
