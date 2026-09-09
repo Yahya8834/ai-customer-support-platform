@@ -46,5 +46,12 @@ jobs:
       - name: Start services
         run: docker compose up -d
 
+      - name: Wait for PostgreSQL
+        run: |
+          until docker compose exec -T db pg_isready -U postgres -d customer_support; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+
       - name: Run backend tests
         run: docker compose exec -T web python manage.py test --exclude-tag=integration
