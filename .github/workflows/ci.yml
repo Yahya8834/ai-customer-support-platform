@@ -31,6 +31,15 @@ jobs:
           RABBITMQ_DEFAULT_PASS=guest
           EOF
 
+      - name: Create AI service CI environment
+        run: |
+          cat > backend/ai_service/.env <<'EOF'
+          BGE_API_URL=http://localhost:11434
+          BGE_MODEL=bge-m3:567m
+          LLM_API_URL=http://localhost:11434
+          QWEN_INFERENCE_KEY=ci-test-key
+          EOF
+
       - name: Build development containers
         run: docker compose build
 
