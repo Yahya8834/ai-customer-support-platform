@@ -1,10 +1,10 @@
 import httpx
-from django.test import SimpleTestCase
-from apps.documents_processing.providers.generate_embeddings import (
-    GenerateEmbeddingsProvider,
-)
+from django.test import SimpleTestCase, tag
+from apps.documents_processing.providers.generate_embeddings import GenerateEmbeddingsProvider
 
 
+
+@tag("integration")
 class EmbeddingIntegrationTests(SimpleTestCase):
 
     def test_documents_processing_can_reach_ai_service(self):

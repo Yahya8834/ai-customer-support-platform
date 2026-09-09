@@ -1,9 +1,10 @@
 import time
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, tag
 from apps.common.integrations.ai_service.client import AIServiceClient
 
 
 
+@tag("integration")
 class AIServiceIntegrationTests(SimpleTestCase):
 
     def test_django_can_call_qwen_through_ai_service(self):
