@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, tag
 from apps.common.exceptions import EmbeddingGenerationError
 from apps.documents_processing.providers.generate_embeddings import (
     GenerateEmbeddingsProvider,
@@ -6,7 +6,7 @@ from apps.documents_processing.providers.generate_embeddings import (
 from unittest.mock import patch
 
 
-
+@tag("integration")
 class EmbeddingProviderTests(TestCase):
 
     def setUp(self):

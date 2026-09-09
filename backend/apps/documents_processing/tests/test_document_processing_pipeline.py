@@ -1,5 +1,5 @@
 from pathlib import Path
-from django.test import TestCase
+from django.test import TestCase, tag
 from apps.accounts.models import User
 from apps.documents.models import Document
 from apps.documents_processing.models import (
@@ -16,7 +16,7 @@ from django.core.files import File
 
 
 
-
+@tag("integration")
 class DocumentProcessingPipelineTests(TestCase):
 
     def setUp(self):

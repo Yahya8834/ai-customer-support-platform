@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.conf import settings
 from pathlib import Path
@@ -70,6 +70,7 @@ class ProcessDocumentServiceTests(TestCase):
         )
 
     
+    @tag("integration")
     def test_process_document_completes_successfully(self):
 
         document = ProcessDocumentService.execute(

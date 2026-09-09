@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.contrib.auth import get_user_model
 from apps.workspaces.models import Workspace
 from apps.documents.models import Document
@@ -17,6 +17,7 @@ from pathlib import Path
 
 class EmbeddingPipelineTests(TestCase):
 
+    @tag("integration")
     @patch("apps.documents_processing.services.process_document.PdfTextExtractionService.execute")
     def test_processing_document_creates_embeddings(self,mock_extract_text,):
 
