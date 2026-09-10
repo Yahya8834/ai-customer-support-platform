@@ -1,14 +1,16 @@
-import { registerUser } from "../services/auth-service";
+import { apiClient } from "@/lib/api/client";
+import {loginUser, registerUser} from "../services/auth-service";
 
-const mockApiClient = jest.fn();
 
 jest.mock("@/lib/api/client", () => ({
-  apiClient: (...args: unknown[]) => mockApiClient(...args),
+  apiClient: jest.fn(),
 }));
 
-describe("registerUser", () => {
+const mockedApiClient = jest.mocked(apiClient);
+
+describe("auth-service", () => {
   beforeEach(() => {
-    mockApiClient.mockReset();
+    mockedApiClient.mockReset();
   });
 
   it("sends registration data to the registration endpoint", async () => {
@@ -24,14 +26,43 @@ describe("registerUser", () => {
       email: "john@example.com",
     };
 
-    mockApiClient.mockResolvedValue(response);
+    mockedApiClient.mockResolvedValue(response);
 
     const result = await registerUser(request);
 
-    expect(mockApiClient).toHaveBeenCalledWith("/api/v1/register/", {
-      method: "POST",
-      body: JSON.stringify(request),
-    });
+    expect(mockedApiClient).toHaveBeenCalledWith(
+      "/api/v1/register/",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      },
+    );
+
+    expect(result).toEqual(response);
+  });
+
+  it("logs in a user", async () => {
+    const request = {
+      username: "john",
+      password: "password123",
+    };
+
+    const response = {
+      access: "access-token",
+      refresh: "refresh-token",
+    };
+
+    mockedApiClient.mockResolvedValue(response);
+
+    const result = await loginUser(request);
+
+    expect(mockedApiClient).toHaveBeenCalledWith(
+      "/api/v1/login/",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      },
+    );
 
     expect(result).toEqual(response);
   });
