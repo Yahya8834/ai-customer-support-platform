@@ -6,6 +6,7 @@ describe("apiClient", () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,
       status: 401,
+      json: jest.fn().mockResolvedValue({}),
     });
 
     await expect(apiClient("/api/v1/me/")).rejects.toEqual(
