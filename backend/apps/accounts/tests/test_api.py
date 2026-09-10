@@ -44,6 +44,33 @@ class RegisterUserAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(User.objects.count(), 1)
 
+    def test_cannot_register_with_duplicate_username(self):
+        User.objects.create_user(
+            username="john",
+            email="john@example.com",
+            password="StrongPassword123!",
+        )
+        payload = {
+            "username": "john",
+            "email": "john2@example.com",
+            "password": "StrongPassword123!",
+        }
+
+        response = self.client.post(
+            "/api/v1/register/",
+            payload,
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(
+            response.data["username"][0],
+            "A user with this username already exists.",
+        )
 
     def test_cannot_register_with_invalid_email(self):
         payload = {

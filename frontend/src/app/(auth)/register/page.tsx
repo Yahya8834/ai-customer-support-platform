@@ -1,9 +1,10 @@
 "use client";
+
 import { useState } from "react";
+
 import RegisterForm from "@/features/auth/components/register-form";
 import { registerUser } from "@/features/auth/services/auth-service";
-
-
+import { ApiError } from "@/lib/api/api-error";
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +22,13 @@ export default function RegisterPage() {
       await registerUser(data);
       setSuccess(true);
     } catch (error) {
+      if (error instanceof ApiError && error.details) {
+        const messages = Object.values(error.details).flat();
+
+        setError(messages[0] ?? "Unable to create account.");
+        return;
+      }
+
       setError(
         error instanceof Error
           ? error.message
@@ -37,9 +45,7 @@ export default function RegisterPage() {
 
       {success && (
         <>
-          <p role="status">
-            Account created successfully.
-          </p>
+          <p role="status">Account created successfully.</p>
 
           <a href="/login">Sign in</a>
         </>

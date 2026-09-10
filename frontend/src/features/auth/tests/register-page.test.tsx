@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import RegisterPage from "@/app/(auth)/register/page";
 import userEvent from "@testing-library/user-event";
+import { ApiError } from "@/lib/api/api-error";
 
 
 
@@ -233,5 +234,46 @@ describe("RegisterPage", () => {
         name: /sign in/i,
       }),
     ).toHaveAttribute("href", "/login");
+  });
+
+  it("displays the backend validation error", async () => {
+    mockRegisterUser.mockRejectedValue(
+      new ApiError(
+        "API request failed with status 400",
+        400,
+        {
+          email: ["A user with this email already exists."],
+        },
+      ),
+    );
+
+    const user = userEvent.setup();
+
+    render(<RegisterPage />);
+
+    await user.type(
+      screen.getByLabelText(/username/i),
+      "john",
+    );
+    await user.type(
+      screen.getByLabelText(/email/i),
+      "john@example.com",
+    );
+    await user.type(
+      screen.getByLabelText(/password/i),
+      "password123",
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: /create account/i,
+      }),
+    );
+
+    expect(
+      await screen.findByText(
+        /a user with this email already exists/i,
+      ),
+    ).toBeInTheDocument();
   });
 });
