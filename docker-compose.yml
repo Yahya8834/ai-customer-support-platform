@@ -115,6 +115,31 @@ services:
       - rabbitmq
       - redis
     command: celery -A config.celery worker --loglevel=info --pool=solo --without-gossip
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    container_name: customer-support-frontend
+
+    volumes:
+      - ./frontend:/app
+      - /app/.next
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      WATCHPACK_POLLING: "true"
+
+    env_file:
+      - ./frontend/.env.local
+
+    depends_on:
+      - web
+
+    command: npm run dev
     
 volumes:
   postgres_data:

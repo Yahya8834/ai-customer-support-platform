@@ -55,3 +55,35 @@ jobs:
 
       - name: Run backend tests
         run: docker compose exec -T web python manage.py test --exclude-tag=integration
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create CI environment
+        run: |
+          cat > .env <<'EOF'
+          SECRET_KEY=ci-test-secret-key
+          DEBUG=True
+          ALLOWED_HOSTS=localhost,127.0.0.1,web
+          DATABASE_URL=postgresql://postgres:postgres@db:5432/customer_support
+          AI_SERVICE_URL=http://ai_service:8001
+          CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+          RABBITMQ_DEFAULT_USER=guest
+          RABBITMQ_DEFAULT_PASS=guest
+          EOF
+
+      - name: Start Django service
+        run: docker compose up -d db web
+        
+      - name: Build frontend container
+        run: docker compose build frontend
+
+      - name: Run frontend unit tests
+        run: docker compose run --rm frontend npm test -- --runInBand --testPathIgnorePatterns=client.integration.test.ts
+
+      - name: Run frontend integration tests
+        run: docker compose run --rm frontend npm test -- --runInBand src/lib/api/tests/client.integration.test.ts
