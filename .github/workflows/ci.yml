@@ -104,7 +104,14 @@ jobs:
         run: docker compose up -d db web
 
       - name: Build frontend container
-        run: docker compose build frontend
+        uses: docker/bake-action@v6
+        with:
+          files: docker-compose.yml
+          targets: frontend
+          load: true
+          set: |
+            frontend.cache-from=type=gha,scope=frontend
+            frontend.cache-to=type=gha,scope=frontend,mode=max
 
       - name: Install frontend dependencies
         run: docker compose run --rm -e NODE_ENV=development frontend npm ci
