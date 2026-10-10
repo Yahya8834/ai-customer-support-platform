@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LoginForm from "../components/login-form";
 
@@ -105,5 +105,13 @@ describe("LoginForm", () => {
     ).toBeDisabled();
 
     resolveSubmit();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", {
+          name: /sign in/i,
+        }),
+      ).toBeEnabled();
     });
+  });
 });
