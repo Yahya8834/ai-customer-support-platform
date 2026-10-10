@@ -99,3 +99,7 @@ jobs:
 
       - name: Run frontend integration tests
         run: docker compose run --rm frontend npm test -- --runInBand --testPathPattern=integration.test.ts
+
+      - name: Show Django logs on failure
+        if: failure()
+        run: docker compose logs --tail=150 web
