@@ -36,6 +36,7 @@ jobs:
 
       - name: Create AI service CI environment
         run: |
+          mkdir -p backend/ai_service
           cat > backend/ai_service/.env <<'EOF'
           BGE_API_URL=http://localhost:11434
           BGE_MODEL=bge-m3:567m
