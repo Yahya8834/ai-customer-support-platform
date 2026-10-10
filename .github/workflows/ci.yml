@@ -109,6 +109,9 @@ jobs:
       - name: Run frontend unit tests
         run: docker compose run --rm frontend npm test -- --runInBand --testPathIgnorePatterns=integration.test.ts
 
+      - name: Run database migrations
+        run: docker compose exec -T web python manage.py migrate --noinput
+
       - name: Create frontend integration user
         run: docker compose exec -T web python manage.py create_integration_user
 
