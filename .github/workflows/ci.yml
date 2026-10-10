@@ -116,7 +116,7 @@ jobs:
         run: docker compose exec -T web python manage.py create_integration_user
 
       - name: Run frontend integration tests
-        run: docker compose run --rm frontend npm test -- --runInBand --testPathPattern=integration.test.ts
+        run: docker compose run --rm frontend npm test -- --runInBand --testPathPatterns=integration.test.ts
 
       - name: Show Django logs on failure
         if: failure()
