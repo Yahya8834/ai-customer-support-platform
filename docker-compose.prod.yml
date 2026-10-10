@@ -126,6 +126,24 @@ services:
 
     command: celery -A config.celery worker --loglevel=info --pool=solo --without-gossip
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: https://project1-api.devyahya.com
+
+    container_name: customer-support-frontend
+
+    restart: unless-stopped
+
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: https://project1-api.devyahya.com
+
+    expose:
+      - "3000"
+
   nginx:
     image: nginx:alpine
     container_name: customer-support-nginx
