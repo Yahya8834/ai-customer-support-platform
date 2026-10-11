@@ -160,4 +160,77 @@ describe("RegisterForm", () => {
     expect(passwordInput).toHaveAttribute("minlength", "8");
     expect(onSubmit).not.toHaveBeenCalled();
   });
+
+  it("allows the user to retry after registration fails", async () => {
+    const user = userEvent.setup();
+
+    const onSubmit = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("Registration failed"))
+      .mockResolvedValueOnce(undefined);
+    render(<RegisterForm onSubmit={onSubmit} />);
+    await user.type(
+      screen.getByLabelText(/username/i),
+      "john",
+    );
+    await user.type(
+      screen.getByLabelText(/email/i),
+      "john@example.com",
+    );
+    await user.type(
+      screen.getByLabelText(/password/i),
+      "StrongPassword123!",
+    );
+    await user.click(
+      screen.getByRole("button", {
+        name: /create account/i,
+      }),
+    );
+    expect(
+      await screen.findByRole("button", {
+        name: /create account/i,
+      }),
+    ).toBeEnabled();
+    await user.click(
+      screen.getByRole("button", {
+        name: /create account/i,
+      }),
+    );
+    expect(onSubmit).toHaveBeenCalledTimes(2);
+
+    });
+
+  it("displays an error message when registration fails", async () => {
+    const user = userEvent.setup();
+    const onSubmit = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("Registration failed"));
+
+    render(<RegisterForm onSubmit={onSubmit} />);
+
+    await user.type(
+      screen.getByLabelText(/username/i),
+      "john",
+    );
+
+    await user.type(
+      screen.getByLabelText(/email/i),
+      "john@example.com",
+    );
+
+    await user.type(
+      screen.getByLabelText(/password/i),
+      "StrongPassword123!",
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: /create account/i,
+      }),
+    );
+
+    expect(
+      await screen.findByRole("alert"),
+    ).toHaveTextContent(/registration failed/i);
+  });
 });

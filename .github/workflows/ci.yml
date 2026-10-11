@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      - "feature/**"
-      - "fix/**"
   pull_request:
     branches:
       - main
@@ -127,6 +125,13 @@ jobs:
 
       - name: Run frontend integration tests
         run: docker compose run --rm -e NODE_ENV=development frontend npm test -- --runInBand --testPathPatterns=integration.test.ts
+
+      - name: Verify production frontend build
+        run: >-
+          docker build
+          --build-arg NEXT_PUBLIC_API_BASE_URL=https://project1-api.devyahya.com
+          -t customer-support-frontend-ci
+          ./frontend
 
       - name: Show Django logs on failure
         if: failure()
