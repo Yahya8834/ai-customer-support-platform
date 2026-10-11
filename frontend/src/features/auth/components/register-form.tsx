@@ -17,6 +17,7 @@ export default function RegisterForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -32,11 +33,16 @@ export default function RegisterForm({
     setIsSubmitting(true);
 
     try {
+      setError(null);
+
       await onSubmit({
         username,
         email,
         password,
       });
+    } catch {
+      // Registration failed; keep the form available for another attempt
+      setError("Registration failed, Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -44,6 +50,7 @@ export default function RegisterForm({
 
   return (
     <form onSubmit={handleSubmit}>
+      {error && <p role="alert">{error}</p>}
       <div>
         <label htmlFor="username">Username</label>
         <input

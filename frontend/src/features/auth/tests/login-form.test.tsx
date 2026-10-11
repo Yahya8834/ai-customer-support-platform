@@ -105,5 +105,12 @@ describe("LoginForm", () => {
     ).toBeDisabled();
 
     resolveSubmit();
-    });
+
+    expect(
+      await screen.findByRole("button", {
+        name: /^sign in$/i,
+      }),
+    ).toBeEnabled();
+
+  });
 });
