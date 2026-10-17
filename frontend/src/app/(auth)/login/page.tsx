@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import LoginForm from "@/features/auth/components/login-form";
@@ -9,6 +10,7 @@ import { loginUser } from "@/features/auth/services/auth-service";
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(data: {
     username: string;
@@ -19,7 +21,7 @@ export default function LoginPage() {
 
     try {
       await loginUser(data);
-      setSuccess(true);
+      router.push("/dashboard");
     } catch (error) {
       setError(
         error instanceof Error

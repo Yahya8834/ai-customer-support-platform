@@ -1,15 +1,28 @@
-import { render, screen } from "@testing-library/react";
-import LoginPage from "@/app/(auth)/login/page";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import LoginPage from "@/app/(auth)/login/page";
 import { loginUser } from "@/features/auth/services/auth-service";
 
+const mockPush = jest.fn();
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
 
 jest.mock("@/features/auth/services/auth-service", () => ({
   loginUser: jest.fn(),
 }));
 
+
+
 describe("LoginPage", () => {
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("renders the login form", () => {
     render(<LoginPage />);
 
@@ -71,7 +84,7 @@ describe("LoginPage", () => {
     });
   });
 
-  it("shows a success message after successful login", async () => {
+  it("redirects to the dashboard after successful login", async () => {
     const user = userEvent.setup();
 
     jest.mocked(loginUser).mockResolvedValue({
@@ -81,14 +94,8 @@ describe("LoginPage", () => {
 
     render(<LoginPage />);
 
-    await user.type(
-      screen.getByLabelText(/username/i),
-      "john",
-    );
-    await user.type(
-      screen.getByLabelText(/password/i),
-      "password123",
-    );
+    await user.type(screen.getByLabelText(/username/i), "john");
+    await user.type(screen.getByLabelText(/password/i), "password123");
 
     await user.click(
       screen.getByRole("button", {
@@ -96,9 +103,14 @@ describe("LoginPage", () => {
       }),
     );
 
-    expect(
-      await screen.findByRole("status"),
-    ).toHaveTextContent(/signed in successfully/i);
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/dashboard");
+    });
+
+    expect(loginUser).toHaveBeenCalledWith({
+      username: "john",
+      password: "password123",
+    });
   });
 
   it("displays an error when login fails", async () => {
